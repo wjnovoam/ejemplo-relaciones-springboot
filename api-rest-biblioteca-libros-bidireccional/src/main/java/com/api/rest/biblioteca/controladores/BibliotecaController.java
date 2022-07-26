@@ -28,12 +28,12 @@ public class BibliotecaController {
 
 	@Autowired
 	private BibliotecaRepository bibliotecaRepository;
-	
+
 	@GetMapping
 	public ResponseEntity<Page<Biblioteca>> listarBibliotecas(Pageable pageable){
 		return ResponseEntity.ok(bibliotecaRepository.findAll(pageable));
 	}
-	
+
 	@PostMapping
 	public ResponseEntity<Biblioteca> guardarBiblioteca(@Valid @RequestBody Biblioteca biblioteca){
 		Biblioteca bibliotecaGuardada = bibliotecaRepository.save(biblioteca);
@@ -41,41 +41,38 @@ public class BibliotecaController {
 				.buildAndExpand(bibliotecaGuardada.getId()).toUri();
 		return ResponseEntity.created(ubicacion).body(bibliotecaGuardada);
 	}
-	
+
 	@PutMapping("/{id}")
 	public ResponseEntity<Biblioteca> actualizarBiblioteca(@PathVariable Integer id,@Valid @RequestBody Biblioteca biblioteca){
 		Optional<Biblioteca> bibliotecaOptional = bibliotecaRepository.findById(id);
-		
+
 		if(!bibliotecaOptional.isPresent()){
 			return ResponseEntity.unprocessableEntity().build();
 		}
-		
+
 		biblioteca.setId(bibliotecaOptional.get().getId());
 		bibliotecaRepository.save(biblioteca);
-		
+
 		return ResponseEntity.noContent().build();
 	}
-	
+
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Biblioteca> eliminarBiblioteca(@PathVariable Integer id){
 		Optional<Biblioteca> bibliotecaOptional = bibliotecaRepository.findById(id);
-		
+
 		if(!bibliotecaOptional.isPresent()){
 			return ResponseEntity.unprocessableEntity().build();
 		}
-		
+
 		bibliotecaRepository.delete(bibliotecaOptional.get());
 		return ResponseEntity.noContent().build();
 	}
-	
+
 	@GetMapping("/{id}")
 	public ResponseEntity<Biblioteca> obtenerBibliotecaPorId(@PathVariable Integer id){
 		Optional<Biblioteca> bibliotecaOptional = bibliotecaRepository.findById(id);
-		
-		if(!bibliotecaOptional.isPresent()){
-			return ResponseEntity.unprocessableEntity().build();
-		}
-		
-		return ResponseEntity.ok(bibliotecaOptional.get());
+
+		return bibliotecaOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.unprocessableEntity().build());
+
 	}
 }
